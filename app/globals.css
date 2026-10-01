@@ -151,6 +151,27 @@ body {
   }
 }
 
+/* Workshop cards fade up when they land in a column (raised, started, released); a signal ring then fades out. */
+.card-enter {
+  transition:
+    opacity 240ms var(--ease-out-strong),
+    transform 240ms var(--ease-out-strong),
+    box-shadow 900ms ease-out;
+}
+@starting-style {
+  .card-enter {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @starting-style {
+    .card-enter {
+      transform: none;
+    }
+  }
+}
+
 dialog::backdrop {
   background: rgb(15 23 42 / 0.45);
 }

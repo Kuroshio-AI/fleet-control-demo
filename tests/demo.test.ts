@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { createSeed } from "../lib/seed";
 import { costError, reducer, renewalError, workOrderError, type Action, type WorkOrderInput } from "../lib/store";
-import { buildViews, docState, isOpen } from "../lib/rules";
+import { buildViews, docState, isOpen, serviceProgress } from "../lib/rules";
 import { BUS_ID, OVERSPEED_ID, RESTORE_ID, SERVICE_ID } from "../lib/sim";
 import { csvCell, toCsv } from "../lib/csv";
 import { PATHS, distM, pointAt } from "../lib/geo";
@@ -156,4 +156,12 @@ test("CSV: quoting, formula neutralising, numbers untouched", () => {
   expect(csvCell("-2+3")).toBe("'-2+3");
   expect(csvCell(-5)).toBe("-5");
   expect(toCsv([["a", 1], ["b\nc", null]])).toBe('a,1\r\n"b\nc",');
+});
+
+test("service forecast agrees with the service-due rule", () => {
+  const s = seed();
+  for (const w of buildViews(s).values()) {
+    const p = serviceProgress(w.v, s.serviceInterval, "2026-10-01");
+    expect(p.used >= 1).toBe(w.due !== null);
+  }
 });

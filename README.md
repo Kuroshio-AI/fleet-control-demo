@@ -36,10 +36,11 @@ To show an optional "presented by" line under the title, set `NEXT_PUBLIC_PRESEN
 3. **Vehicle and playback:** search `LB-003`. Open it, then **History** → **Play** or drag the scrubber.
 4. **Bus leaves depot:** open **Demo controls** and run **Bus leaves depot**. One geofence-exit alert appears. Acknowledge it, then resolve it.
 5. **Maintenance:** in **Demo controls**, run **Service due** for `DEMO-HV-017`.
-   1. Click **Create work order** and save it.
-   2. Click **Start work** and enter costs.
-   3. Add completion notes and tick the quality check.
-   4. Click **Complete and release**. The status counts move 30/7/8/3/2 → 30/7/7/3/3 → back.
+   1. Click **Create work order** and save it. On the workshop board the card moves from **Due for service** to **Scheduled**, and **Fleet in service** drops to 94%.
+   2. Click **Start work** on the card. It moves to **In workshop**.
+   3. Open **Costs, quality check and release**, enter parts and labour, tick the three checklist items and add completion notes.
+   4. Click **Complete and release**. The card lands in **Released today**, and the banner shows the next service date. On the Control Room the status counts move 30/7/8/3/2 → 30/7/7/3/3 → back.
+   5. Point at **Service forecast** (who is due next) and **Repair history** (the seeded breakdown repair).
 6. **Compliance:** filter to **Expired** and click **Record demo renewal** on `DEMO-HV-020` insurance. The default date is one year later.
 7. **Close:** export a filtered fleet CSV.
 

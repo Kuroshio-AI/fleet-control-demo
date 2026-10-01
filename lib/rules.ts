@@ -38,6 +38,13 @@ export function serviceDue(v: Vehicle, date: string): string | null {
   return null;
 }
 
+/** Share of the service interval used, by distance or time, whichever is further along (1 or more = due). */
+export function serviceProgress(v: Vehicle, interval: { km: number; days: number }, date: string) {
+  const kmLeft = Math.round(v.nextServiceKm - v.odometerKm);
+  const daysLeft = daysBetween(date, v.nextServiceDate);
+  return { kmLeft, daysLeft, used: Math.max(1 - kmLeft / interval.km, 1 - daysLeft / interval.days) };
+}
+
 export const zonesAt = (zones: Zone[], lat: number, lng: number) =>
   zones.filter((z) => distM([lat, lng], z.center) <= z.radiusM).map((z) => z.id);
 

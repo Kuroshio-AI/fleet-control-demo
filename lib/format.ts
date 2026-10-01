@@ -23,3 +23,7 @@ export const fmtDate = (date: string) => dateFmt.format(utc(date));
 
 export const fmtKm = (km: number) => `${Math.round(km).toLocaleString("en-US")} km`;
 export const fmtAed = (n: number) => `AED ${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export const fmtDuration = (ms: number) => {
+  const m = Math.max(0, Math.round(ms / 60_000));
+  return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`;
+};
