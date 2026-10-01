@@ -66,7 +66,7 @@ export function Header() {
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <div className="tabular rounded-md bg-white/10 px-2.5 py-1 text-sm" aria-live="off">
             <span className="text-slate-300">Demo clock </span>
-            <span className="font-medium">{fmtTime(s.clock.now)}</span>
+            <span className="font-mono font-medium">{fmtTime(s.clock.now)}</span>
             <span className="text-slate-300"> GST</span>
           </div>
           <button

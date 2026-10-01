@@ -2,12 +2,12 @@ import { useEffect, useRef, type ReactNode } from "react";
 import type { DocStatus, Severity, Status, Workflow } from "@/lib/types";
 
 export const btn =
-  "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600";
+  "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-[transform,background-color,color] duration-150 ease-out active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal";
 export const btnPrimary = `${btn} bg-navy text-white hover:bg-navy-2`;
 export const btnSecondary = `${btn} bg-white text-slate-800 ring-1 ring-inset ring-slate-300 hover:bg-slate-50`;
 export const btnDanger = `${btn} bg-rose-600 text-white hover:bg-rose-700`;
 export const inputCls =
-  "rounded-md bg-white px-2.5 py-1.5 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 outline-none focus:ring-2 focus:ring-sky-600";
+  "rounded-md bg-white px-2.5 py-1.5 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 outline-none focus:ring-2 focus:ring-signal";
 export const card = "rounded-lg bg-white shadow-sm ring-1 ring-slate-200";
 
 const STATUS: Record<Status, { color: string; cls: string; shape: string }> = {
@@ -25,8 +25,16 @@ export function markerSvg(status: Status) {
   return `<svg viewBox="0 0 22 22" aria-hidden="true" fill="${hollow ? "#fff" : color}" stroke="${hollow ? color : "#fff"}" stroke-width="2">${shape}</svg>`;
 }
 
-export function StatusIcon({ status, className = "size-4" }: { status: Status; className?: string }) {
-  return <span className={`inline-block shrink-0 ${className}`} dangerouslySetInnerHTML={{ __html: markerSvg(status) }} />;
+export const statusColor = (status: Status) => STATUS[status].color;
+
+export function StatusIcon({ status, className = "size-4", heading }: { status: Status; className?: string; heading?: number }) {
+  return (
+    <span
+      className={`inline-block shrink-0 [&>svg]:size-full ${className}`}
+      style={heading === undefined ? undefined : { transform: `rotate(${heading}deg)` }}
+      dangerouslySetInnerHTML={{ __html: markerSvg(status) }}
+    />
+  );
 }
 
 function Badge({ cls, children }: { cls: string; children: ReactNode }) {

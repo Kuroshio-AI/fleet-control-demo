@@ -1,35 +1,69 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { useDemo } from "./DemoProvider";
-import { DocBadge, SeverityBadge, StatusBadge, Tag, WorkflowBadge, btn, btnPrimary, btnSecondary, inputCls } from "./ui";
+import { AlertActions } from "./AlertFeed";
+import { DocBadge, SeverityBadge, StatusBadge, StatusIcon, Tag, WorkflowBadge, btn, btnPrimary, btnSecondary, inputCls, statusColor } from "./ui";
 import { fmtAed, fmtDate, fmtDateTime, fmtHm, fmtKm, fmtTime } from "@/lib/format";
 import { isOpen } from "@/lib/rules";
 import { playbackView, type Playback } from "@/lib/playback";
 
-type Props = { id: string; onClose: () => void; pb: Playback | null; setPb: Dispatch<SetStateAction<Playback | null>> };
+type PlaybackProps = { pb: Playback | null; setPb: Dispatch<SetStateAction<Playback | null>> };
+type Props = PlaybackProps & { id: string; autoFocus: boolean; onClose: () => void };
 type Tab = "overview" | "history" | "records";
 const FIVE_MIN = 300_000;
 
-export function VehicleDrawer({ id, onClose, pb, setPb }: Props) {
-  const { s, views } = useDemo();
-  const w = views.get(id)!;
-  const [tab, setTab] = useState<Tab>("overview");
+/**
+ * The shell stays mounted while vehicles change, so it slides in once on open and
+ * then swaps content instantly as the operator browses the list. On wide screens it
+ * fills the alerts column; below that it is a fixed panel on the right.
+ */
+export function VehicleDrawer({ id, autoFocus, onClose, pb, setPb }: Props) {
+  const asideRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const close = useEffectEvent(onClose);
+  const shouldFocus = useEffectEvent(() => autoFocus);
 
-  // Keyboard: focus moves into the drawer, Esc closes it (unless a dialog is on top), focus returns on close.
+  // Focus moves in only when the panel was opened from outside the list (keyboard browsing keeps focus in the list).
+  // Esc closes it unless a dialog is on top; focus goes back to the opener if it was inside the panel.
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
-    closeRef.current?.focus();
+    if (shouldFocus()) closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !document.querySelector("dialog[open]")) close();
     };
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
-      opener?.focus?.();
+      const active = document.activeElement;
+      if (!active || active === document.body || asideRef.current?.contains(active)) opener?.focus?.();
     };
   }, []);
+
+  return (
+    <aside
+      ref={asideRef}
+      aria-labelledby="drawer-title"
+      className="drawer fixed bottom-0 right-0 top-0 z-[1150] flex w-full max-w-[440px] flex-col bg-white shadow-2xl ring-1 ring-slate-300 sm:top-[var(--header-h,96px)] sm:z-[1050] xl:absolute xl:inset-0 xl:z-30 xl:max-w-none xl:shadow-none xl:ring-0"
+    >
+      <button
+        ref={closeRef}
+        type="button"
+        onClick={onClose}
+        className={`${btn} absolute right-2 top-2.5 z-10 px-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900`}
+        aria-label="Close vehicle details"
+        title="Close (Esc)"
+      >
+        ✕
+      </button>
+      <DrawerBody key={id} id={id} pb={pb} setPb={setPb} />
+    </aside>
+  );
+}
+
+function DrawerBody({ id, pb, setPb }: PlaybackProps & { id: string }) {
+  const { s, views } = useDemo();
+  const w = views.get(id)!;
+  const [tab, setTab] = useState<Tab>("overview");
 
   const choose = (t: Tab) => {
     setTab(t);
@@ -40,23 +74,23 @@ export function VehicleDrawer({ id, onClose, pb, setPb }: Props) {
   };
 
   return (
-    <aside
-      aria-labelledby="drawer-title"
-      className="fixed bottom-0 right-0 top-0 z-[1050] sm:top-[var(--header-h,96px)] flex w-full max-w-[440px] flex-col bg-white shadow-2xl ring-1 ring-slate-300"
-    >
+    <>
       <div className="border-b border-slate-200 px-4 pb-2 pt-3">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h2 id="drawer-title" className="text-lg font-semibold">
+        <div className="flex items-center gap-3 pr-8">
+          <span
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg"
+            style={{ backgroundColor: `color-mix(in srgb, ${statusColor(w.status)} 14%, white)` }}
+          >
+            <StatusIcon status={w.status} className="size-5" heading={w.status === "Moving" ? w.v.heading : undefined} />
+          </span>
+          <div className="min-w-0">
+            <h2 id="drawer-title" className="font-mono text-base font-semibold text-navy">
               {id}
             </h2>
-            <p className="text-sm text-slate-600">
+            <p className="truncate text-[13px] text-slate-600">
               {w.v.category} · <span title="Synthetic registration">{w.v.registration}</span> · {w.siteName}
             </p>
           </div>
-          <button ref={closeRef} type="button" onClick={onClose} className={`${btn} -mr-2 text-slate-500 hover:text-slate-900`} aria-label="Close vehicle details">
-            ✕
-          </button>
         </div>
         <div className="mt-2 flex flex-wrap gap-1.5">
           <StatusBadge status={w.status} />
@@ -72,19 +106,19 @@ export function VehicleDrawer({ id, onClose, pb, setPb }: Props) {
               type="button"
               aria-selected={tab === t}
               onClick={() => choose(t)}
-              className="rounded-md px-3 py-1.5 text-sm font-medium capitalize text-slate-600 hover:bg-slate-100 aria-selected:bg-navy aria-selected:text-white"
+              className="rounded-md px-3 py-1.5 text-sm font-medium capitalize text-slate-600 transition-[background-color,color] duration-150 hover:bg-slate-100 aria-selected:bg-navy aria-selected:text-white"
             >
               {t}
             </button>
           ))}
         </div>
       </div>
-      <div role="tabpanel" className="flex-1 overflow-y-auto px-4 py-3 text-sm">
+      <div role="tabpanel" className="flex-1 overflow-y-auto overscroll-contain px-4 py-3 text-sm">
         {tab === "overview" && <Overview id={id} />}
         {tab === "history" && pb && <History id={id} pb={pb} setPb={setPb} />}
         {tab === "records" && <Records id={id} />}
       </div>
-    </aside>
+    </>
   );
 }
 
@@ -99,7 +133,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function Rows({ rows }: { rows: [string, ReactNode][] }) {
   return (
-    <dl className="grid grid-cols-[140px_1fr] gap-x-3 gap-y-1">
+    <dl className="grid grid-cols-[118px_minmax(0,1fr)] gap-x-3 gap-y-1">
       {rows.map(([k, v]) => (
         <div key={k} className="contents">
           <dt className="text-slate-500">{k}</dt>
@@ -223,12 +257,18 @@ function Overview({ id }: { id: string }) {
         {alerts.length ? (
           <ul className="space-y-1.5">
             {alerts.map((a) => (
-              <li key={a.id} className="flex items-start gap-2">
-                <SeverityBadge severity={a.severity} />
-                <span className="flex-1">
-                  {a.type} <span className="text-slate-500">· {fmtHm(a.at)}</span>
-                </span>
-                <WorkflowBadge workflow={a.workflow} />
+              <li key={a.id} className="rounded-md bg-slate-50 p-2 ring-1 ring-slate-200">
+                <div className="flex items-start gap-2">
+                  <SeverityBadge severity={a.severity} />
+                  <span className="flex-1">
+                    {a.type} <span className="text-slate-500">· {fmtHm(a.at)}</span>
+                  </span>
+                  <WorkflowBadge workflow={a.workflow} />
+                </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <AlertActions alert={a} />
+                  {a.conditionActive && <span className="text-[11px] text-slate-500">Resolve after recovery</span>}
+                </div>
               </li>
             ))}
           </ul>
