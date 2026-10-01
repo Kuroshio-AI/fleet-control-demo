@@ -46,7 +46,7 @@ export function Header() {
 
   return (
     <header ref={ref} className="relative z-[1100] bg-navy text-white shadow sm:sticky sm:top-0">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
         <div className="leading-tight">
           <div className="font-semibold tracking-tight">Fleet Control — Demonstration</div>
           {PRESENTED_BY && <div className="text-xs text-slate-300">{PRESENTED_BY}</div>}
@@ -57,13 +57,13 @@ export function Header() {
               key={n.href}
               href={n.href}
               aria-current={path === n.href ? "page" : undefined}
-              className="rounded-md px-3 py-1.5 text-sm text-slate-200 hover:bg-white/10 aria-[current=page]:bg-white/15 aria-[current=page]:text-white"
+              className="rounded-md px-2.5 py-1.5 text-sm text-slate-200 hover:bg-white/10 aria-[current=page]:bg-white/15 aria-[current=page]:text-white"
             >
               {n.label}
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
           <div className="tabular rounded-md bg-white/10 px-2.5 py-1 text-sm" aria-live="off">
             <span className="text-slate-300">Demo clock </span>
             <span className="font-mono font-medium">{fmtTime(s.clock.now)}</span>

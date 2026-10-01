@@ -13,6 +13,9 @@
   --color-paper: #eef1f5;
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Console column steps; named (rem) so they sort correctly between lg and xl / after 2xl. */
+  --breakpoint-laptop: 73.75rem; /* 1180px */
+  --breakpoint-wide: 100rem; /* 1600px */
 }
 
 /* Faint plotting-table grid behind the panels. */

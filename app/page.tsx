@@ -23,20 +23,21 @@ const matches = (w: VehicleView, f: Filters) => {
 };
 
 const PANEL = "overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200";
-// Paper-coloured spread around pinned panels masks the gutters while the list scrolls underneath.
-const APRON = "max-xl:shadow-[0_0_0_12px_var(--color-paper)]";
+// Paper-coloured spread around the pinned map masks the gutter while the list scrolls underneath.
+const APRON = "max-lg:shadow-[0_0_0_12px_var(--color-paper)]";
 
 /*
- * Wide screens (xl): a fixed console — list | map | alerts — that fills the viewport; only the panels scroll.
- * Narrower screens: the map (and alerts from lg) pin under the header while the vehicle list scrolls beneath.
- * --map-top / --map-h also feed the rows' scroll margin so a scrolled-to row never hides behind the pinned map.
+ * Laptop and up (lg): a fixed console — list | map | alerts/details — that fills the viewport.
+ * The page never scrolls; only the vehicle rows and the alert/detail panel do.
+ * Tablets and phones: the map pins under the header and the list's search/filters pin under the map
+ * while the rows scroll. --map-top / --map-h / --list-head also set the rows' scroll margin so a
+ * scrolled-to row never hides behind the pinned map or filter bar.
  */
 const CONSOLE = [
   "flex min-h-0 flex-col gap-3",
-  "[--map-top:0px] [--map-h:40vh] sm:[--map-top:var(--header-h,96px)] sm:[--map-h:42vh]",
-  "lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:[--map-h:46vh]",
-  "xl:flex-1 xl:grid-cols-[360px_minmax(0,1fr)_360px] xl:grid-rows-[minmax(0,1fr)] xl:[--map-h:0px] xl:[--map-top:0px]",
-  "min-[1600px]:grid-cols-[400px_minmax(0,1fr)_400px]",
+  "[--map-top:0px] [--map-h:40vh] [--list-head:130px] sm:[--map-top:var(--header-h,96px)] sm:[--map-h:42vh]",
+  "lg:grid lg:flex-1 lg:grid-rows-[minmax(0,1fr)] lg:grid-cols-[280px_minmax(0,1fr)_300px] lg:[--map-h:0px] lg:[--map-top:0px] lg:[--list-head:0px]",
+  "laptop:grid-cols-[320px_minmax(0,1fr)_340px] xl:grid-cols-[360px_minmax(0,1fr)_360px] wide:grid-cols-[400px_minmax(0,1fr)_400px]",
 ].join(" ");
 
 export default function ControlRoom() {
@@ -84,7 +85,7 @@ export default function ControlRoom() {
   };
 
   return (
-    <div className="flex flex-col gap-3 p-3 sm:p-4 xl:h-[calc(100dvh-var(--header-h,96px))] xl:min-h-[640px] xl:overflow-hidden">
+    <div className="flex flex-col gap-3 p-3 sm:p-4 lg:h-[calc(100dvh-var(--header-h,96px))] lg:min-h-[600px] lg:overflow-hidden">
       <section aria-label="Entire demo fleet" className={`${PANEL} shrink-0 px-3 pb-2 pt-1.5`}>
         <div className="mb-1.5 flex items-center gap-3">
           <h2 className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Entire demo fleet</h2>
@@ -112,7 +113,7 @@ export default function ControlRoom() {
       <div className={CONSOLE}>
         <section
           aria-label="Fleet map"
-          className={`${PANEL} ${APRON} sticky top-[var(--map-top)] z-20 order-1 h-[var(--map-h)] min-h-[240px] lg:col-start-1 lg:row-start-1 xl:static xl:col-start-2 xl:h-auto`}
+          className={`${PANEL} ${APRON} sticky top-[var(--map-top)] z-20 order-1 h-[var(--map-h)] min-h-[240px] lg:static lg:order-none lg:col-start-2 lg:row-start-1 lg:h-auto`}
         >
           <FleetMap
             ref={mapRef}
@@ -129,7 +130,7 @@ export default function ControlRoom() {
 
         <section
           aria-label="Alerts and vehicle details"
-          className={`${PANEL} relative order-3 h-[440px] lg:max-xl:shadow-[0_0_0_12px_var(--color-paper)] lg:sticky lg:top-[var(--map-top)] lg:z-20 lg:order-none lg:col-start-2 lg:row-start-1 lg:h-[var(--map-h)] xl:relative xl:col-start-3 xl:h-auto`}
+          className={`${PANEL} relative order-3 h-[440px] lg:order-none lg:col-start-3 lg:row-start-1 lg:h-auto`}
         >
           <AlertFeed onOpenVehicle={(id) => select(id, "alert")} />
           {selected && (
@@ -139,7 +140,7 @@ export default function ControlRoom() {
 
         <section
           aria-label="Vehicle list"
-          className={`${PANEL} @container order-2 flex flex-col lg:col-span-2 lg:row-start-2 xl:col-span-1 xl:col-start-1 xl:row-start-1 xl:min-h-0`}
+          className="@container order-2 flex flex-col overflow-clip rounded-lg bg-white shadow-sm ring-1 ring-slate-200 lg:order-none lg:col-start-1 lg:row-start-1 lg:min-h-0"
         >
           <VehicleList
             shown={shown}

@@ -14,8 +14,8 @@ const FIVE_MIN = 300_000;
 
 /**
  * The shell stays mounted while vehicles change, so it slides in once on open and
- * then swaps content instantly as the operator browses the list. On wide screens it
- * fills the alerts column; below that it is a fixed panel on the right.
+ * then swaps content instantly as the operator browses the list. From laptop width it
+ * fills the alerts column; on tablets and phones it is a fixed panel on the right.
  */
 export function VehicleDrawer({ id, autoFocus, onClose, pb, setPb }: Props) {
   const asideRef = useRef<HTMLElement>(null);
@@ -43,7 +43,7 @@ export function VehicleDrawer({ id, autoFocus, onClose, pb, setPb }: Props) {
     <aside
       ref={asideRef}
       aria-labelledby="drawer-title"
-      className="drawer fixed bottom-0 right-0 top-0 z-[1150] flex w-full max-w-[440px] flex-col bg-white shadow-2xl ring-1 ring-slate-300 sm:top-[var(--header-h,96px)] sm:z-[1050] xl:absolute xl:inset-0 xl:z-30 xl:max-w-none xl:shadow-none xl:ring-0"
+      className="drawer fixed bottom-0 right-0 top-0 z-[1150] flex w-full max-w-[440px] flex-col bg-white shadow-2xl ring-1 ring-slate-300 sm:top-[var(--header-h,96px)] sm:z-[1050] lg:absolute lg:inset-0 lg:z-30 lg:max-w-none lg:shadow-none lg:ring-0"
     >
       <button
         ref={closeRef}

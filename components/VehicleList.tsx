@@ -29,7 +29,7 @@ const ROW = [
   "transition-[background-color] duration-100 ease-out hover:bg-slate-50",
   "aria-selected:bg-[#e8eff9] aria-selected:shadow-[inset_3px_0_0_var(--color-navy)] aria-selected:transition-none",
   "focus-visible:shadow-[inset_0_0_0_2px_var(--color-signal)] aria-selected:focus-visible:shadow-[inset_3px_0_0_var(--color-navy),inset_0_0_0_2px_var(--color-signal)]",
-  "scroll-mt-[calc(var(--map-top,0px)+var(--map-h,0px)+12px)]",
+  "scroll-mt-[calc(var(--map-top,0px)+var(--map-h,0px)+var(--list-head,0px)+12px)]",
   `@[920px]:items-center @[920px]:py-1.5 ${WIDE_COLS}`,
 ].join(" ");
 
@@ -90,84 +90,85 @@ export function VehicleList({ shown, total, selectedId, onSelect, onHover }: Pro
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-slate-200 px-3 pb-2.5 pt-3">
-        <h2 className="text-[15px] font-semibold tracking-tight text-navy">Vehicles</h2>
-        <span aria-live="polite" className="tabular text-xs text-slate-500">
-          Showing <span className="font-mono font-semibold text-slate-900">{shown.length}</span> of {total}
-        </span>
-        {filtered && (
-          <button type="button" className="text-xs font-semibold text-navy underline-offset-2 hover:underline" onClick={() => dispatch({ type: "CLEAR_FILTERS" })}>
-            Clear filters
+      <div className="z-10 shrink-0 rounded-t-lg bg-white max-lg:sticky max-lg:top-[calc(var(--map-top,0px)+var(--map-h,0px)+12px)]">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-slate-200 px-3 pb-2.5 pt-3">
+          <h2 className="text-[15px] font-semibold tracking-tight text-navy">Vehicles</h2>
+          <span aria-live="polite" className="tabular text-xs text-slate-500">
+            Showing <span className="font-mono font-semibold text-slate-900">{shown.length}</span> of {total}
+          </span>
+          {filtered && (
+            <button type="button" className="text-xs font-semibold text-navy underline-offset-2 hover:underline" onClick={() => dispatch({ type: "CLEAR_FILTERS" })}>
+              Clear filters
+            </button>
+          )}
+          <button
+            type="button"
+            className={`${btnSecondary} ml-auto h-7 px-2 text-xs @[920px]:order-last`}
+            disabled={!shown.length}
+            title="Download the listed vehicles as CSV"
+            onClick={() => downloadCsv(fleetCsv(s, shown, filtered ? `filtered-${shown.length}-of-${total}` : `all-${total}`))}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true" className="size-3.5 fill-none stroke-current stroke-[1.6]">
+              <path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10" />
+            </svg>
+            {filtered ? `Export ${shown.length} shown` : `Export all ${total}`}
           </button>
-        )}
-        <button
-          type="button"
-          className={`${btnSecondary} ml-auto h-7 px-2 text-xs @[920px]:order-last`}
-          disabled={!shown.length}
-          title="Download the listed vehicles as CSV"
-          onClick={() => downloadCsv(fleetCsv(s, shown, filtered ? `filtered-${shown.length}-of-${total}` : `all-${total}`))}
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true" className="size-3.5 fill-none stroke-current stroke-[1.6]">
-            <path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10" />
-          </svg>
-          {filtered ? `Export ${shown.length} shown` : `Export all ${total}`}
-        </button>
-        <label className="relative w-full @[920px]:w-60">
-          <span className="sr-only">Search vehicle ID or driver</span>
-          <svg viewBox="0 0 16 16" aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 fill-none stroke-slate-400 stroke-[1.8]">
-            <circle cx="7" cy="7" r="4.5" />
-            <path d="m10.5 10.5 3 3" />
-          </svg>
-          <input
-            ref={searchRef}
-            type="search"
-            value={f.q}
-            onChange={(e) => setFilters({ q: e.target.value })}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowDown") {
-                e.preventDefault();
-                go(rows()[0]);
-              }
-            }}
-            placeholder="Search vehicle ID or driver"
-            className="h-8 w-full rounded-md bg-slate-50 pl-8 pr-8 text-[13px] text-slate-900 ring-1 ring-inset ring-slate-200 outline-none placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-signal"
-          />
-          <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-slate-300 bg-white px-1 font-mono text-[10px] leading-4 text-slate-500">
-            /
-          </kbd>
-        </label>
-        <div className="grid w-full grid-cols-3 gap-1.5 @[920px]:flex @[920px]:w-auto">
-          <select className={selectCls} aria-label="Category" value={f.category} onChange={(e) => setFilters({ category: e.target.value })}>
-            <option value="">All categories</option>
-            {CATEGORIES.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-          <select className={selectCls} aria-label="Status" value={f.status} onChange={(e) => setFilters({ status: e.target.value })}>
-            <option value="">All statuses</option>
-            {STATUSES.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-          <select className={selectCls} aria-label="Assigned site" value={f.site} onChange={(e) => setFilters({ site: e.target.value })}>
-            <option value="">All sites</option>
-            {s.zones.map((z) => (
-              <option key={z.id} value={z.id}>
-                {z.name}
-              </option>
-            ))}
-          </select>
+          <label className="relative w-full @[920px]:w-60">
+            <span className="sr-only">Search vehicle ID or driver</span>
+            <svg viewBox="0 0 16 16" aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 fill-none stroke-slate-400 stroke-[1.8]">
+              <circle cx="7" cy="7" r="4.5" />
+              <path d="m10.5 10.5 3 3" />
+            </svg>
+            <input
+              ref={searchRef}
+              type="search"
+              value={f.q}
+              onChange={(e) => setFilters({ q: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  go(rows()[0]);
+                }
+              }}
+              placeholder="Search vehicle ID or driver"
+              className="h-8 w-full rounded-md bg-slate-50 pl-8 pr-8 text-[13px] text-slate-900 ring-1 ring-inset ring-slate-200 outline-none placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-signal"
+            />
+            <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-slate-300 bg-white px-1 font-mono text-[10px] leading-4 text-slate-500">
+              /
+            </kbd>
+          </label>
+          <div className="grid w-full grid-cols-3 gap-1.5 @[920px]:flex @[920px]:w-auto">
+            <select className={selectCls} aria-label="Category" value={f.category} onChange={(e) => setFilters({ category: e.target.value })}>
+              <option value="">All categories</option>
+              {CATEGORIES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+            <select className={selectCls} aria-label="Status" value={f.status} onChange={(e) => setFilters({ status: e.target.value })}>
+              <option value="">All statuses</option>
+              {STATUSES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+            <select className={selectCls} aria-label="Assigned site" value={f.site} onChange={(e) => setFilters({ site: e.target.value })}>
+              <option value="">All sites</option>
+              {s.zones.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {z.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
-
-      <div
-        aria-hidden="true"
-        className={`hidden border-b border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 @[920px]:grid ${WIDE_COLS}`}
-      >
-        <span />
-        {["Vehicle", "Category", "Driver", "Status", "Speed", "Assigned site", "Updated", "Next service"].map((h) => (
-          <span key={h}>{h}</span>
-        ))}
+        <div
+          aria-hidden="true"
+          className={`hidden border-b border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 @[920px]:grid ${WIDE_COLS}`}
+        >
+          <span />
+          {["Vehicle", "Category", "Driver", "Status", "Speed", "Assigned site", "Updated", "Next service"].map((h) => (
+            <span key={h}>{h}</span>
+          ))}
+        </div>
       </div>
 
       <ul
@@ -175,7 +176,7 @@ export function VehicleList({ shown, total, selectedId, onSelect, onHover }: Pro
         role="listbox"
         aria-label="Vehicles"
         onKeyDown={onListKey}
-        className="@[620px]:grid @[620px]:grid-cols-2 @[920px]:grid-cols-1 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:overscroll-contain"
+        className="@[620px]:grid @[620px]:grid-cols-2 @[920px]:grid-cols-1 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain"
       >
         {shown.map((w, i) => (
           <Row
