@@ -2,6 +2,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { useDemo } from "./DemoProvider";
 import { AlertActions } from "./AlertFeed";
+import { CAMERAS, CameraFeed } from "./CameraFeed";
 import { DocBadge, SeverityBadge, StatusBadge, StatusIcon, Tag, WorkflowBadge, btn, btnPrimary, btnSecondary, inputCls, statusColor } from "./ui";
 import { fmtAed, fmtDate, fmtDateTime, fmtHm, fmtKm, fmtTime } from "@/lib/format";
 import { isOpen } from "@/lib/rules";
@@ -161,6 +162,12 @@ function Overview({ id }: { id: string }) {
 
   return (
     <>
+      {id in CAMERAS && (
+        <Section title="Road camera (sample footage)">
+          <CameraFeed id={id} />
+        </Section>
+      )}
+
       <Section title="Telemetry (simulated)">
         <Rows
           rows={[

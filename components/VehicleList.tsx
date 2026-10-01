@@ -1,5 +1,6 @@
 import { useEffect, useRef, type CSSProperties, type KeyboardEvent } from "react";
 import { useDemo } from "./DemoProvider";
+import { CAMERAS } from "./CameraFeed";
 import { StatusIcon, Tag, btnSecondary, statusColor } from "./ui";
 import { downloadCsv, fleetCsv } from "@/lib/csv";
 import { fmtDate, fmtHm, fmtKm, fmtTime } from "@/lib/format";
@@ -231,7 +232,16 @@ function Row({ w, selected, focusable, onSelect, onHover }: RowProps) {
       </span>
 
       <span className="col-start-2 row-start-1 flex min-w-0 items-baseline gap-2 @[920px]:contents">
-        <span className="font-mono text-[13px] font-semibold text-navy @[920px]:col-start-2 @[920px]:row-start-1">{v.id}</span>
+        <span className="font-mono text-[13px] font-semibold text-navy @[920px]:col-start-2 @[920px]:row-start-1">
+          {v.id}
+          {v.id in CAMERAS && (
+            <svg viewBox="0 0 16 16" role="img" aria-label="Road camera" className="ml-1.5 inline size-3 -translate-y-px fill-none stroke-slate-400 stroke-[1.6]">
+              <title>Road camera (sample feed)</title>
+              <rect x="1.5" y="4.5" width="9" height="7" rx="1.5" />
+              <path d="M10.5 7.25 14.5 5v6l-4-2.25" />
+            </svg>
+          )}
+        </span>
         <span className={`truncate text-[11px] font-semibold uppercase tracking-wider @[920px]:col-start-5 @[920px]:row-start-1 ${STATUS_TEXT[w.status]}`}>
           {w.status}
           {!v.connected && w.status !== "Offline" && <span className="ml-1 normal-case tracking-normal text-rose-700">· no link</span>}

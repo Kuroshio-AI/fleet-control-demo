@@ -2,7 +2,7 @@
 
 A browser-only demo of fleet-management workflows. It shows 50 **simulated** vehicles on a control-room map, an alert workflow, route playback, a maintenance work order and compliance renewals, with CSV export.
 
-Every vehicle, driver, document, site, route and threshold is synthetic. The demo has no live GPS connection, no backend and no login. It does not prove production readiness, device compatibility or capacity.
+Every vehicle, driver, document, site, route and threshold is synthetic, and the road-camera clip is stock footage standing in for a vehicle camera. The demo has no live GPS connection, no backend and no login. It does not prove production readiness, device compatibility or capacity.
 
 ## Run it
 
@@ -33,7 +33,9 @@ To show an optional "presented by" line under the title, set `NEXT_PUBLIC_PRESEN
 
 1. **Before you start:** click **Reset demo**, then set **16×** so vehicles visibly move at fleet zoom.
 2. **Control Room:** show the 50 vehicles. Filter by category or status from the KPI tiles; "Showing N of 50" sits next to the filters.
-3. **Vehicle and playback:** search `LB-003`. Open it, then **History** → **Play** or drag the scrubber.
+3. **Vehicle, camera and playback:**
+   1. Click `DEMO-HV-001`. Its panel opens with a sample road-camera feed. A camera icon in the list marks the four fitted vehicles: HV-001, HV-007, LB-001 and SB-001.
+   2. Search `LB-003`, open it, then **History** → **Play** or drag the scrubber.
 4. **Bus leaves depot:** open **Demo controls** and run **Bus leaves depot**. One geofence-exit alert appears. Acknowledge it, then resolve it.
 5. **Maintenance:** in **Demo controls**, run **Service due** for `DEMO-HV-017`.
    1. Click **Create work order** and save it. On the workshop board the card moves from **Due for service** to **Scheduled**, and **Fleet in service** drops to 94%.
@@ -44,13 +46,14 @@ To show an optional "presented by" line under the title, set `NEXT_PUBLIC_PRESEN
 6. **Compliance:** filter to **Expired** and click **Record demo renewal** on `DEMO-HV-020` insurance. The default date is one year later.
 7. **Close:** export a filtered fleet CSV.
 
-Other scenarios: **Overspeed example** (`DEMO-HV-007`) and **Restore device** (`DEMO-SUV-002`).
+Other scenarios: **Overspeed example** (`DEMO-HV-007`) and **Restore device** (`DEMO-SUV-002`). Open HV-007's panel before running the overspeed example: the camera clip speeds up with the vehicle.
 
 ## Offline fallback
 
 1. Before the meeting, run `bun run build`.
 2. If the network fails, run `bun run preview`.
 3. If map tiles cannot load, the map switches itself to a schematic grid. You can also switch it in **Demo controls** to rehearse.
+4. Use Chrome or Edge for the preview. Safari may not play the camera clip from this simple server, because it does not support range requests.
 
 Changes persist in this browser's local storage. Each browser or device runs its own independent demo, with no sync between them.
 
@@ -66,4 +69,5 @@ The code is split into plain TypeScript logic and the React UI:
   - `storage.ts`: versioned local storage.
   - `csv.ts`: the exports.
 - **UI:** `components/` and `app/` hold React and Leaflet only. Every total on screen is derived from the shared records.
+- **Camera:** `public/video/road-camera.mp4` joins three free Pexels clips of one drive near Abu Dhabi (videos 5038128, 5038129 and 5038130, under the Pexels licence), re-encoded with ffmpeg. With real hardware, the same panel would play the in-vehicle camera recorder's live stream or event clips instead.
 - **Map data:** route lines are illustrative. They were generated once from the public OSRM demo router using OpenStreetMap data (© OpenStreetMap contributors) and are not validated routing. Basemap tiles come from OpenStreetMap under its tile usage policy.
